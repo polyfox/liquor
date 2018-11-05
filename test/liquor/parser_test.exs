@@ -5,23 +5,23 @@ defmodule Liquor.ParserTest do
     test "parses an expression" do
       assert {tokens, ""} = Liquor.Lexer.tokenize("inserted_at >= 2018-06-09")
       {:ok, result} = Liquor.Parser.parse(tokens)
-      assert {:expression, {:gte, {:atom, "inserted_at"}, {:atom, "2018-06-09"}}} == result
+      assert {:exp, {:gte, {:atom, "inserted_at"}, {:atom, "2018-06-09"}}} == result
     end
 
     test "parses a series of expressions" do
       assert {tokens, ""} = Liquor.Lexer.tokenize("inserted_at >= 2018-06-09 AND updated_at <= 2019-06-23")
       {:ok, result} = Liquor.Parser.parse(tokens)
       assert {
-        {:expression, {:gte, {:atom, "inserted_at"}, {:atom, "2018-06-09"}}},
+        {:exp, {:gte, {:atom, "inserted_at"}, {:atom, "2018-06-09"}}},
         :AND,
-        {:expression, {:lte, {:atom, "updated_at"}, {:atom, "2019-06-23"}}}
+        {:exp, {:lte, {:atom, "updated_at"}, {:atom, "2019-06-23"}}}
       } == result
     end
 
     test "parses a group of expressions" do
       {:ok, result} = Liquor.Parser.parse("(a == b)")
 
-      assert {:group, {:expression, {:eq, {:atom, "a"}, {:atom, "b"}}}} == result
+      assert {:group, {:exp, {:eq, {:atom, "a"}, {:atom, "b"}}}} == result
     end
   end
 end

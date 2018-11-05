@@ -33,10 +33,10 @@ expression -> '(' space expressions space ')' : {group, '$3'}.
 expression -> '(' space expressions ')' : {group, '$3'}.
 expression -> '(' expressions space ')' : {group, '$2'}.
 expression -> '(' expressions ')' : {group, '$2'}.
-expression -> lhd space op space rhd : {expression, {'$3', '$1', '$5'}}.
-expression -> lhd op space rhd : {expression, {'$2', '$1', '$4'}}.
-expression -> lhd space op rhd : {expression, {'$3', '$1', '$4'}}.
-expression -> lhd op rhd : {expression, {'$2', '$1', '$3'}}.
+expression -> lhd space op space rhd : {exp, {'$3', '$1', '$5'}}.
+expression -> lhd op space rhd : {exp, {'$2', '$1', '$4'}}.
+expression -> lhd space op rhd : {exp, {'$3', '$1', '$4'}}.
+expression -> lhd op rhd : {exp, {'$2', '$1', '$3'}}.
 
 lhd -> atom : '$1'.
 lhd -> string : '$1'.
