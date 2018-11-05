@@ -18,6 +18,24 @@ defmodule Liquor.ParserTest do
       } == result
     end
 
+    test "parses an AND chain" do
+      assert {tokens, ""} = Liquor.Lexer.tokenize("a AND b AND c")
+      {:ok, result} = Liquor.Parser.parse(tokens)
+      assert {
+        :AND,
+        {:value, {:atom, "a"}}
+      }
+    end
+
+    test "parses an AND group chain" do
+      assert {tokens, ""} = Liquor.Lexer.tokenize("a AND (b AND c)")
+      {:ok, result} = Liquor.Parser.parse(tokens)
+      assert {
+        :AND,
+        {:value, {:atom, "a"}}
+      }
+    end
+
     test "parses an OR expression" do
       assert {tokens, ""} = Liquor.Lexer.tokenize("inserted_at >= 2018-06-09 OR updated_at <= 2019-06-23")
       {:ok, result} = Liquor.Parser.parse(tokens)
@@ -38,6 +56,12 @@ defmodule Liquor.ParserTest do
       {:ok, result} = Liquor.Parser.parse("[a b c]")
 
       assert {:value, [{:atom, "a"}, {:atom, "b"}, {:atom, "c"}]} == result
+    end
+
+    test "parses a string" do
+      {:ok, result} = Liquor.Parser.parse(~s("John Doe"))
+
+      assert {:value, {:string, "John Doe"}} == result
     end
   end
 end
