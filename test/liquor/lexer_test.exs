@@ -5,22 +5,22 @@ defmodule Liquor.LexerTest do
   describe "tokenize/1" do
     test "tokenizes given string" do
       assert {[
-        {:atom, "ABC"}, :space,
-        {:atom, "A-B_C"}, :space,
-        {:string, "Hello, World"}, :space,
-        {:group, [
-          {:atom, "a"}, :space,
-          {:atom, "b"}, :space,
+        {:atom, "ABC"}, {:space, 1}, {:eq, 1}, {:space, 1}, {:atom, "A-B_C"}, {:space, 1},
+        {:string, "Hello, World"}, {:space, 1},
+        {:'(', 1},
+          {:atom, "a"}, {:space, 1},
+          {:atom, "b"}, {:space, 1},
           {:atom, "c"},
-        ]}, :space,
-        {:list, [
-          {:atom, "d"}, :space,
-          {:atom, "e"}, :space,
+        {:')', 1}, {:space, 1},
+        {:'[', 1},
+          {:atom, "d"}, {:space, 1},
+          {:atom, "e"}, {:space, 1},
           {:atom, "f"},
-        ]}, :space,
-        {:atom, "g"}, :*, :space,
-        :*, {:atom, "h"},
-      ], ""} == Lexer.tokenize(~s|ABC A-B_C "Hello, World" (a b c) [d e f] g* *h|)
+        {:']', 1}, {:space, 1},
+        {:atom, "g"}, {:wc, 1}, {:space, 1},
+        {:wc, 1}, {:atom, "h"}, {:space, 1},
+        {:atom, "x"}, {:in, 1}, {:atom, "y"},
+      ], ""} == Lexer.tokenize(~s|ABC == A-B_C "Hello, World" (a b c) [d e f] g* *h x~y|)
     end
   end
 end

@@ -1,4 +1,22 @@
 defmodule Liquor.Lexer do
+  @moduledoc """
+  Converts a given string into tokens for consumption
+  """
+  @type token ::
+    {:atom, String.t} |
+    {:string, String.t} |
+    {:space, non_neg_integer} |
+    {:eq, non_neg_integer} |
+    {:neq, non_neg_integer} |
+    {:lte, non_neg_integer} |
+    {:gte, non_neg_integer} |
+    {:gt, non_neg_integer} |
+    {:lt, non_neg_integer} |
+    {:*, non_neg_integer} |
+    {:in, non_neg_integer} |
+    {:and, non_neg_integer} |
+    {:or, non_neg_integer}
+
   # escaped quote
   defp do_tokenize_string("\\\"" <> rest, quote_char, acc) do
     do_tokenize_string(rest, quote_char, ["\"" | acc])
@@ -21,14 +39,17 @@ defmodule Liquor.Lexer do
   end
 
   def tokenize_word(str) do
-    case String.split(str, ~r/\A([\w_\-\+\.]+)/, parts: 2, include_captures: true) do
+    case String.split(str, ~r/\A([\w_\-\+\.\:]+)/, parts: 2, include_captures: true) do
       [_] -> nil
+      [_, "IN", rest] -> {{:in, 1}, rest}
+      [_, "AND", rest] -> {{:and, 1}, rest}
+      [_, "OR", rest] -> {{:or, 1}, rest}
       [_, word, rest] -> {{:atom, word}, rest}
     end
   end
 
   defp space([:space | _acc] = acc), do: acc
-  defp space(acc), do: [:space | acc]
+  defp space(acc), do: [{:space, 1} | acc]
 
   @spec do_tokenize(String.t, list, list) :: {[term], String.t}
   defp do_tokenize(<<>>, _state, acc), do: {Enum.reverse(acc), ""}
@@ -40,26 +61,25 @@ defmodule Liquor.Lexer do
     {result, rest} = tokenize_string(str)
     do_tokenize(rest, state, [{:string, result} | acc])
   end
-  defp do_tokenize("==" <> rest, state, acc), do: do_tokenize(rest, state, [:eq | acc])
-  defp do_tokenize("!=" <> rest, state, acc), do: do_tokenize(rest, state, [:neq | acc])
-  defp do_tokenize("<=" <> rest, state, acc), do: do_tokenize(rest, state, [:leq | acc])
-  defp do_tokenize(">=" <> rest, state, acc), do: do_tokenize(rest, state, [:geq | acc])
-  defp do_tokenize(">" <> rest, state, acc), do: do_tokenize(rest, state, [:gt | acc])
-  defp do_tokenize("<" <> rest, state, acc), do: do_tokenize(rest, state, [:lt | acc])
-  defp do_tokenize("*" <> rest, state, acc), do: do_tokenize(rest, state, [:* | acc])
+  defp do_tokenize("==" <> rest, state, acc), do: do_tokenize(rest, state, [{:eq, 1} | acc])
+  defp do_tokenize("!=" <> rest, state, acc), do: do_tokenize(rest, state, [{:neq, 1} | acc])
+  defp do_tokenize("<=" <> rest, state, acc), do: do_tokenize(rest, state, [{:lte, 1} | acc])
+  defp do_tokenize(">=" <> rest, state, acc), do: do_tokenize(rest, state, [{:gte, 1} | acc])
+  defp do_tokenize(">" <> rest, state, acc), do: do_tokenize(rest, state, [{:gt, 1} | acc])
+  defp do_tokenize("<" <> rest, state, acc), do: do_tokenize(rest, state, [{:lt, 1} | acc])
+  defp do_tokenize("*" <> rest, state, acc), do: do_tokenize(rest, state, [{:wc, 1} | acc])
+  defp do_tokenize("~" <> rest, state, acc), do: do_tokenize(rest, state, [{:in, 1} | acc])
   defp do_tokenize("(" <> rest, state, acc) do
-    {acc2, ")" <> rest2} = do_tokenize(rest, [:'(' | state], [])
-    do_tokenize(rest2, state, [{:group, acc2} | acc])
+    do_tokenize(rest, [:'(' | state], [{:'(', 1} | acc])
   end
-  defp do_tokenize(<<")", _rest :: binary>> = str, [:'(' | _state], acc) do
-    {Enum.reverse(acc), str}
+  defp do_tokenize(")" <> rest, [:'(' | state], acc) do
+    do_tokenize(rest, state, [{:')', 1} | acc])
   end
   defp do_tokenize("[" <> rest, state, acc) do
-    {acc2, "]" <> rest2} = do_tokenize(rest, [:'[' | state], [])
-    do_tokenize(rest2, state, [{:list, acc2} | acc])
+    do_tokenize(rest, [:'[' | state], [{:'[', 1} | acc])
   end
-  defp do_tokenize(<<"]", _rest :: binary>> = str, [:'[' | _state], acc) do
-    {Enum.reverse(acc), str}
+  defp do_tokenize("]" <> rest, [:'[' | state], acc) do
+    do_tokenize(rest, state, [{:']', 1} | acc])
   end
   defp do_tokenize(str, state, acc) do
     case tokenize_word(str) do
