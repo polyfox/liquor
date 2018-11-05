@@ -6,7 +6,8 @@ defmodule Liquor.LexerTest do
     test "tokenizes given string" do
       assert {[
         {:atom, "ABC"}, :space,
-        {:string, "ABC"}, :space,
+        {:atom, "A-B_C"}, :space,
+        {:string, "Hello, World"}, :space,
         {:group, [
           {:atom, "a"}, :space,
           {:atom, "b"}, :space,
@@ -16,8 +17,10 @@ defmodule Liquor.LexerTest do
           {:atom, "d"}, :space,
           {:atom, "e"}, :space,
           {:atom, "f"},
-        ]},
-      ], ""} == Lexer.tokenize(~s|ABC "ABC" (a b c) [d e f]|)
+        ]}, :space,
+        {:atom, "g"}, :*, :space,
+        :*, {:atom, "h"},
+      ], ""} == Lexer.tokenize(~s|ABC A-B_C "Hello, World" (a b c) [d e f] g* *h|)
     end
   end
 end

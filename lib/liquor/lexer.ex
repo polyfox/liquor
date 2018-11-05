@@ -46,6 +46,7 @@ defmodule Liquor.Lexer do
   defp do_tokenize(">=" <> rest, state, acc), do: do_tokenize(rest, state, [:geq | acc])
   defp do_tokenize(">" <> rest, state, acc), do: do_tokenize(rest, state, [:gt | acc])
   defp do_tokenize("<" <> rest, state, acc), do: do_tokenize(rest, state, [:lt | acc])
+  defp do_tokenize("*" <> rest, state, acc), do: do_tokenize(rest, state, [:* | acc])
   defp do_tokenize("(" <> rest, state, acc) do
     {acc2, ")" <> rest2} = do_tokenize(rest, [:'(' | state], [])
     do_tokenize(rest2, state, [{:group, acc2} | acc])
