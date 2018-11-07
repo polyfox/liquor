@@ -23,6 +23,8 @@ defmodule Liquor.MixProject do
     [
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0", optional: true},
+      {:postgrex, ">= 0.14.0", only: [:test]},
+      {:ex_machina, ">= 2.2.2", only: [:test]},
     ]
   end
 end
