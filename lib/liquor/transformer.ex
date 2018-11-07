@@ -16,30 +16,32 @@ defmodule Liquor.Transformer do
   }
 
   @spec transform_value(term, atom, atom, spec_item) :: {:ok, {atom, atom, term}} | :error
-  defp transform_value(value, op, key, {:type, module}) do
+  defp transform_value(value, op, key, {:mod, module}) do
     case module.cast(value) do
       {:ok, new_value} -> {:ok, {op, key, new_value}}
       :error -> :error
       {:error, _} = err -> err
     end
   end
-
   defp transform_value(value, op, key, {:apply, m, f, a}) when is_atom(m) and is_atom(f) do
     :erlang.apply(m, f, [op, key, value | a])
   end
-
   defp transform_value(value, op, key, f) when is_function(f) do
     f.(op, key, value)
   end
-
   defp transform_value(value, op, key, :boolean) do
     case Liquor.Types.Boolean.cast(value) do
       {:ok, new_value} -> {:ok, {op, key, new_value}}
       :error -> :error
     end
   end
-
-  defp transform_value(value, op, key, type) when is_atom(type) do
+  defp transform_value(value, op, key, {:type, :date}) do
+    case Liquor.Transformers.Date.transform(value) do
+      {:ok, new_value} -> {:ok, {op, key, new_value}}
+      :error -> :error
+    end
+  end
+  defp transform_value(value, op, key, {:type, type}) when is_atom(type) do
     case Ecto.Type.cast(type, value) do
       {:ok, new_value} -> {:ok, {op, key, new_value}}
       :error -> :error

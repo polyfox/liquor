@@ -14,6 +14,9 @@ defmodule Liquor do
   @spec transform_terms(list, Liquor.Transformer.type_spec()) :: list
   def transform_terms(terms, type_spec), do: Liquor.Transformer.transform(terms, type_spec)
 
+  @spec filter_terms(Ecto.Query.t, list, Liquor.Filter.filter()) :: Ecto.Query.t
+  def filter_terms(query, terms, filter), do: Liquor.Filter.filter(query, terms, filter)
+
   @spec prepare_terms(String.t, search_spec) :: {:ok, list} | {:error, term}
   def prepare_terms(string, spec) when is_binary(string) do
     case parse_string(string) do
@@ -21,14 +24,25 @@ defmodule Liquor do
       {:error, _} = err -> err
     end
   end
+  def prepare_terms(terms, spec) when is_map(terms) do
+    prepare_terms(Map.to_list(terms), spec)
+  end
   def prepare_terms(terms, spec) when is_list(terms) do
     terms = whitelist_terms(terms, spec.whitelist)
     terms = transform_terms(terms, spec.transform)
     {:ok, terms}
   end
 
-  @spec apply_terms(Ecto.Query.t | module, list, search_spec) :: Ecto.Query.t
-  def apply_terms(query, terms, spec) do
-    Liquor.Filter.filter(query, terms, spec.filter)
+  @spec apply_search(Ecto.Query.t, String.t | list, search_spec) :: Ecto.Query.t
+  def apply_search(query, string, spec) when is_binary(string) do
+    {:ok, terms} = prepare_terms(string, spec)
+    apply_search(query, terms, spec)
+  end
+  def apply_search(query, terms, spec) when is_map(terms) do
+    apply_search(query, Map.to_list(terms), spec)
+  end
+  def apply_search(query, terms, spec) when is_list(terms) do
+    query
+    |> filter_terms(terms, spec.filter)
   end
 end

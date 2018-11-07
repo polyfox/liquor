@@ -3,7 +3,14 @@ defmodule Liquor.Whitelist do
   Whitelist takes a list of search items and attempts to filter them
   """
   @type filter_func :: ((atom, atom, term) -> {:ok, {atom, atom, term} | {atom, term}} | :reject)
-  @type filter :: map | filter_func
+  @type filter_item ::
+    nil |
+    boolean |
+    atom |
+    {:apply, module, atom, list} |
+    filter_func
+  @type filter ::
+    %{items: %{String.t => filter_item}} | filter_func
 
   defp invert_op(:match), do: :unmatch
   defp invert_op(:unmatch), do: :match
