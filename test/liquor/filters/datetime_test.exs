@@ -6,9 +6,22 @@ defmodule Liquor.Filters.DateTimeTest do
   describe "apply_filter(&1, :match, &2, %Date{})" do
     test "can filter by date" do
       a = insert(:message, inserted_at: %NaiveDateTime{year: 2018, month: 11, day: 7, hour: 0, minute: 0, second: 0})
+      _b = insert(:message, inserted_at: %NaiveDateTime{year: 2018, month: 11, day: 6, hour: 0, minute: 0, second: 0})
       query =
         Message
         |> DTF.apply_filter(:match, :inserted_at, %Date{year: 2018, month: 11, day: 7})
+      assert [m] = Repo.all(query)
+      assert m.id == a.id
+    end
+  end
+
+  describe "apply_filter(&1, :match, &2, %NaiveDateTime{})" do
+    test "can match datetime with a NaiveDateTime" do
+      a = insert(:message, inserted_at: %NaiveDateTime{year: 2018, month: 11, day: 7, hour: 0, minute: 0, second: 0})
+      _b = insert(:message, inserted_at: %NaiveDateTime{year: 2018, month: 11, day: 6, hour: 0, minute: 0, second: 0})
+      query =
+        Message
+        |> DTF.apply_filter(:match, :inserted_at, %NaiveDateTime{year: 2018, month: 11, day: 7, hour: 0, minute: 0, second: 0})
       assert [m] = Repo.all(query)
       assert m.id == a.id
     end
