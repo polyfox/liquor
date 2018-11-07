@@ -175,13 +175,13 @@ defmodule Liquor.Parser do
     end
   end
 
-  defp do_parse_raw(<<>>, acc, _options) do
-    acc
-    |> Enum.reverse()
-    |> List.flatten()
+  defp do_parse(<<>>, acc, _options) do
+    {:ok,
+      acc
+      |> Enum.reverse()
+      |> List.flatten()}
   end
-
-  defp do_parse_raw(value, acc, options) do
+  defp do_parse(value, acc, options) do
     value = String.trim_leading(value)
     case parse_key(value, options) do
       {:ok, key, rest} ->
@@ -193,14 +193,14 @@ defmodule Liquor.Parser do
               nil -> {key, values}
               op -> {op, key, values}
             end
-            do_parse_raw(rest, [value | acc], options)
+            do_parse(rest, [value | acc], options)
 
           {:error, _} = err -> err
         end
       {:error, :not_key} ->
         case parse_terms(value, [], [], options) do
           {:ok, values, rest} ->
-            do_parse_raw(rest, [handle_values(values, options) | acc], options)
+            do_parse(rest, [handle_values(values, options) | acc], options)
 
           {:error, _} = err -> err
         end
@@ -243,9 +243,6 @@ defmodule Liquor.Parser do
       value_format: :strip,
       values_format: :unwrap,
     ], options)
-    case do_parse_raw(value, [], options) do
-      list when is_list(list) -> {:ok, list}
-      {:error, _reason} = err -> err
-    end
+    do_parse(value, [], options)
   end
 end

@@ -3,7 +3,7 @@ defmodule Liquor.Transformer do
   Transformer takes a list of search items and tries to
   """
   @type spec_item ::
-    {module, atom, [term]} |
+    {:apply, module, atom, list} |
     {:type, module} |
     atom |
     ((atom, atom, term) -> {:ok, {atom, atom, term}} | :error)
@@ -24,7 +24,7 @@ defmodule Liquor.Transformer do
     end
   end
 
-  defp transform_value(value, op, key, {m, f, a}) when is_atom(m) and is_atom(f) do
+  defp transform_value(value, op, key, {:apply, m, f, a}) when is_atom(m) and is_atom(f) do
     :erlang.apply(m, f, [op, key, value | a])
   end
 
