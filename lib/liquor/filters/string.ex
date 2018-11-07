@@ -1,6 +1,6 @@
 defmodule Liquor.Filters.String do
   @moduledoc """
-  Specialized module for filtering numeric fields
+  Specialized module for filtering string fields
   """
   import Ecto.Query
 

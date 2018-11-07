@@ -1,4 +1,7 @@
 defmodule Liquor.Filter do
+  @moduledoc """
+  Applies search terms as filters to a given Ecto.Query
+  """
   import Ecto.Query
 
   @type filter ::

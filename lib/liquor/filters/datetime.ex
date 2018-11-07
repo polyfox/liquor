@@ -1,6 +1,6 @@
 defmodule Liquor.Filters.DateTime do
   @moduledoc """
-  Specialized module for filtering date fields
+  Specialized module for filtering timestamp fields
   """
   import Ecto.Query
 
