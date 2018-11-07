@@ -6,12 +6,15 @@ defmodule Liquor.Parser do
   def unquote_string("\"" <> rest), do: String.trim_trailing(rest, "\"")
   def unquote_string(rest), do: rest
 
+  defp parse_dstring_body(<<>>, _acc) do
+    {:error, :unclosed_string}
+  end
   defp parse_dstring_body(<<"\"", _ :: binary>> = rest, acc) do
     result =
       acc
       |> Enum.reverse()
       |> Enum.join()
-    {result, rest}
+    {:ok, result, rest}
   end
   defp parse_dstring_body("\\\"" <> rest, acc) do
     parse_dstring_body(rest, ["\"" | acc])
@@ -20,12 +23,15 @@ defmodule Liquor.Parser do
     parse_dstring_body(rest, [<<c>> | acc])
   end
 
+  defp parse_sstring_body(<<>>, _acc) do
+    {:error, :unclosed_string}
+  end
   defp parse_sstring_body(<<"'", _ :: binary>> = rest, acc) do
     result =
       acc
       |> Enum.reverse()
       |> Enum.join()
-    {result, rest}
+    {:ok, result, rest}
   end
   defp parse_sstring_body("\\'" <> rest, acc) do
     parse_sstring_body(rest, ["'" | acc])
@@ -36,18 +42,24 @@ defmodule Liquor.Parser do
 
   @spec parse_string(String.t, Keyword.t) :: {:ok, String.t, String.t}
   def parse_string(<<"\"", rest :: binary>>, options) do
-    {str, "\"" <> rest} = parse_dstring_body(rest, [])
-    case options[:value_format] do
-      :raw -> {:ok, str, rest}
-      :strip -> {:ok, unquote_string(str), rest}
+    case parse_dstring_body(rest, []) do
+      {:ok, str, "\"" <> rest} ->
+        case options[:value_format] do
+          :raw -> {:ok, str, rest}
+          :strip -> {:ok, unquote_string(str), rest}
+        end
+      {:error, _} = err -> err
     end
   end
 
   def parse_string(<<"'", rest :: binary>>, options) do
-    {str, "'" <> rest} = parse_sstring_body(rest, [])
-    case options[:value_format] do
-      :raw -> {:ok, str, rest}
-      :strip -> {:ok, unquote_string(str), rest}
+    case parse_sstring_body(rest, []) do
+      {:ok, str, "'" <> rest} ->
+        case options[:value_format] do
+          :raw -> {:ok, str, rest}
+          :strip -> {:ok, unquote_string(str), rest}
+        end
+      {:error, _} = err -> err
     end
   end
 
