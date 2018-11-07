@@ -10,11 +10,11 @@ defmodule Liquor.Parser do
     result =
       acc
       |> Enum.reverse()
-      |> String.join()
+      |> Enum.join()
     {result, rest}
   end
   defp parse_dstring_body("\\\"" <> rest, acc) do
-    parse_string_body(rest, ["\"" | acc])
+    parse_dstring_body(rest, ["\"" | acc])
   end
   defp parse_dstring_body(<<c :: utf8, rest :: binary>>, acc) do
     parse_dstring_body(rest, [<<c>> | acc])
@@ -24,11 +24,11 @@ defmodule Liquor.Parser do
     result =
       acc
       |> Enum.reverse()
-      |> String.join()
+      |> Enum.join()
     {result, rest}
   end
   defp parse_sstring_body("\\'" <> rest, acc) do
-    parse_string_body(rest, ["'" | acc])
+    parse_sstring_body(rest, ["'" | acc])
   end
   defp parse_sstring_body(<<c :: utf8, rest :: binary>>, acc) do
     parse_sstring_body(rest, [<<c>> | acc])
@@ -36,7 +36,7 @@ defmodule Liquor.Parser do
 
   @spec parse_string(String.t, Keyword.t) :: {:ok, String.t, String.t}
   def parse_string(<<"\"", rest :: binary>>, options) do
-    {str, "\"" <> rest} = parse_dstring_body(rest)
+    {str, "\"" <> rest} = parse_dstring_body(rest, [])
     case options[:value_format] do
       :raw -> {:ok, str, rest}
       :strip -> {:ok, unquote_string(str), rest}
@@ -44,7 +44,7 @@ defmodule Liquor.Parser do
   end
 
   def parse_string(<<"'", rest :: binary>>, options) do
-    {str, "'" <> rest} = parse_sstring_body(rest)
+    {str, "'" <> rest} = parse_sstring_body(rest, [])
     case options[:value_format] do
       :raw -> {:ok, str, rest}
       :strip -> {:ok, unquote_string(str), rest}
@@ -145,6 +145,24 @@ defmodule Liquor.Parser do
     end
   end
 
+  @spec parse_key(String.t, Keyword.t) :: {:ok, String.t, String.t} | {:error, :not_key}
+  def parse_key(<<char :: binary-size(1), _ :: binary>> = str, options) when char in ["\"", "'"] do
+    case parse_string(str, options) do
+      {:ok, key, ":" <> rest} ->
+        key = cleanup_key(key, options)
+        {:ok, key, rest}
+      _ -> {:error, :not_key}
+    end
+  end
+  def parse_key(str, options) do
+    case String.split(str, ~r/\A([^\s,:"']+):/, include_captures: true, split: 2) do
+      [_, key, rest] ->
+        key = cleanup_key(key, options)
+        {:ok, key, rest}
+      [_] -> {:error, :not_key}
+    end
+  end
+
   defp do_parse_raw(<<>>, acc, _options) do
     acc
     |> Enum.reverse()
@@ -153,9 +171,8 @@ defmodule Liquor.Parser do
 
   defp do_parse_raw(value, acc, options) do
     value = String.trim_leading(value)
-    case parse_term(value) do
-      {:ok, term, ":" <> rest} ->
-        key = cleanup_key(key, options)
+    case parse_key(value, options) do
+      {:ok, key, rest} ->
         {op, rest} = parse_operator(rest, options)
         case parse_terms(rest, [], [], options) do
           {:ok, values, rest} ->
@@ -168,7 +185,7 @@ defmodule Liquor.Parser do
 
           {:error, _} = err -> err
         end
-      _ ->
+      {:error, :not_key} ->
         case parse_terms(value, [], [], options) do
           {:ok, values, rest} ->
             do_parse_raw(rest, [handle_values(values, options) | acc], options)
@@ -207,6 +224,13 @@ defmodule Liquor.Parser do
   """
   @spec parse(String.t, Keyword.t) :: {:ok, list} | {:error, term}
   def parse(value, options \\ []) do
+    options = Keyword.merge([
+      parse_operators: false,
+      key_format: :strip,
+      commit_format: :join,
+      value_format: :strip,
+      values_format: :unwrap,
+    ], options)
     case do_parse_raw(value, [], options) do
       list when is_list(list) -> {:ok, list}
       {:error, _reason} = err -> err

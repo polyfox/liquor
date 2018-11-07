@@ -6,7 +6,7 @@ defmodule Liquor.Transformer do
     {module, atom, [term]} |
     {:type, module} |
     atom |
-    ((op, key, value) :: {:ok, {atom, atom, term}} | :error)
+    ((atom, atom, term) -> {:ok, {atom, atom, term}} | :error)
 
   @type type_spec :: %{
     items: %{
@@ -15,7 +15,7 @@ defmodule Liquor.Transformer do
     keyword: spec_item
   }
 
-  @spec transform_value(term, atom, atom, spec_item) :: {:ok, value} | :error
+  @spec transform_value(term, atom, atom, spec_item) :: {:ok, {atom, atom, term}} | :error
   defp transform_value(value, op, key, {:type, module}) do
     case module.cast(value) do
       {:ok, new_value} -> {:ok, {op, key, new_value}}

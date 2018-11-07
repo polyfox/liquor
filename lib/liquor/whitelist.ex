@@ -5,7 +5,7 @@ defmodule Liquor.Whitelist do
   defp apply_filter(_op, _key, _value, nil), do: :reject
   defp apply_filter(_op, _key, _value, false), do: :reject
   defp apply_filter(op, key, value, true), do: {:ok, {op, key, value}}
-  defp apply_filter(op, key, value, atom) when is_atom(atom), do: {:ok, {op, atom, value}}
+  defp apply_filter(op, _key, value, atom) when is_atom(atom), do: {:ok, {op, atom, value}}
   defp apply_filter(op, key, value, {m, f, a}) when is_atom(m) and is_atom(f) do
     :erlang.apply(m, f, [op, key, value | a])
   end
@@ -21,7 +21,7 @@ defmodule Liquor.Whitelist do
     [{:match, key, value} | acc]
   end
 
-  @spec whitelist(list, map | ((atom, atom, term) :: {:ok, {atom, atom, term} | {atom, term}} | :reject)) :: list
+  @spec whitelist(list, map | ((atom, atom, term) -> {:ok, {atom, atom, term} | {atom, term}} | :reject)) :: list
   def whitelist(values, filter) when is_function(filter) do
     Enum.reduce(values, [], fn
       {op, key, value}, acc ->
