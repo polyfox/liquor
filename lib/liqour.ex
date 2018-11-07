@@ -27,7 +27,7 @@ defmodule Liquor do
     {:ok, terms}
   end
 
-  @spec apply_terms(Ecto.Query.t | module, list) :: Ecto.Query.t
+  @spec apply_terms(Ecto.Query.t | module, list, search_spec) :: Ecto.Query.t
   def apply_terms(query, terms, spec) do
     Liquor.Filter.filter(query, terms, spec.filter)
   end
