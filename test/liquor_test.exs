@@ -14,10 +14,10 @@ defmodule LiquorTest do
         body: {:type, :string},
         event_date: {:type, :date},
       },
-      keyword: nil,
+      keyword: {:type, :string},
     },
     filter: %{
-      nil: {:apply, LiquorTest, :keyword_filter, []},
+      _: {:apply, LiquorTest, :keyword_filter, []},
       body: {:type, :string},
       event_date: {:type, :date},
     },

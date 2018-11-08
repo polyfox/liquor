@@ -29,7 +29,8 @@ defmodule Liquor.Whitelist do
   end
   defp apply_filter(_op, _key, _value, nil), do: :reject
   defp apply_filter(_op, _key, _value, false), do: :reject
-  defp apply_filter(op, key, value, true), do: {:ok, {op, key, value}}
+  defp apply_filter(op, :_, value, true), do: {:ok, {op, :_, value}}
+  defp apply_filter(op, key, value, true), do: {:ok, {op, String.to_atom(key), value}}
   defp apply_filter(op, _key, value, atom) when is_atom(atom), do: {:ok, {op, atom, value}}
   defp apply_filter(op, key, value, {:apply, m, f, a}) when is_atom(m) and is_atom(f) do
     :erlang.apply(m, f, [op, key, value | a])
@@ -54,7 +55,7 @@ defmodule Liquor.Whitelist do
       {key, value}, acc ->
         handle_item(apply_filter(:match, key, value, filter), acc)
       value, acc ->
-        handle_item(apply_filter(:match, nil, value, filter), acc)
+        handle_item(apply_filter(:match, :_, value, filter), acc)
     end)
   end
   def whitelist(terms, map) when is_map(map) do
