@@ -1,21 +1,50 @@
 # Liquor
 
-**TODO: Add description**
+A clumsy filtering library, loosely based on lucene.
 
-## Installation
+This library is still a work in progress and may be buggy as a old house infested with termites.
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `liquor` to your list of dependencies in `mix.exs`:
+## Usage
 
-```elixir
-def deps do
-  [
-    {:liquor, "~> 0.1.0"}
-  ]
-end
+First you must define a search spec, luckily it's just a plain old map
+
+```
+my_search_spec = %{
+  # Whitelists can be a map containing the name of each 'allowed' field.
+  whitelist: %{
+    items: %{
+      :_ => true, # :_ is a special key for strings with no key
+      "derp" => nil, # this field will be rejected
+      "body" => true, # this field will be allowed,
+      "kind" => :message_kind, # the field will be renamed to `message_kind` and accepted
+      "date" => :date,
+    }
+  },
+  # transforms tell liquor how to convert the whitelisted fields
+  transform: %{
+    items: %{
+      _: {:type, :string},
+      body: {:type, :string}, # uses Ecto.Type.cast(:string)
+      message_kind: {:mod, MessageKindEnum}, # works with Ecto.Type modules
+      date: {:type, :date}, # dates, datetimes and time have special transforms
+    },
+    keyword: {:type, :string}, # a special handler for keywords, may be dropped in the future, just use :_ instead probably
+  },
+  # filter tells liquor how to handle the transformed values when adding it to the query
+  filter: %{
+    _: {:apply, MyFilter, :filter_keyword, []}, # an apply can be used, here it's being used for the keywords
+    body: {:type, :string}, # treats the value as a string, this gives access to wildcards
+    message_kind: {:type, :atom}, #
+    date: {:type, :date}, # date, datetime and time are subject to special handling
+  },
+}
+
+messages =
+  Message
+  |> Liquor.apply_search("date:year:2018 body:'Hello '*", my_search_spec)
+  |> Repo.all()
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/liquor](https://hexdocs.pm/liquor).
+## TODO
 
+Introduce a DSL, or at least some helper functions for building the `search_spec`
