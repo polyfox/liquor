@@ -67,7 +67,7 @@ defmodule Liquor.Parser do
   def parse_term(<<"\"", _rest :: binary>> = str, options), do: parse_string(str, options)
   def parse_term(<<"\'", _rest :: binary>> = str, options), do: parse_string(str, options)
   def parse_term(value, options) do
-    case Regex.split(~r/\A("([^"]*)"|'([^']*)'|[^\s,'"]+)/, value, include_captures: true) do
+    case Regex.split(~r/\A([^\s,'"]+)/, value, include_captures: true) do
       [_, value, rest] ->
         case options[:value_format] do
           :raw -> {:ok, value, rest}

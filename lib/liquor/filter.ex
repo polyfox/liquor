@@ -58,6 +58,12 @@ defmodule Liquor.Filter do
   def apply_filter(query, op, key, value, {:type, :string, _}) when is_binary(value) do
     Liquor.Filters.String.apply_filter(query, op, key, value)
   end
+  def apply_filter(query, op, key, value, {:type, :atom, _}) when is_atom(value) do
+    Liquor.Filters.Atom.apply_filter(query, op, key, value)
+  end
+  def apply_filter(query, op, key, value, {:type, :boolean, _}) when is_boolean(value) do
+    Liquor.Filters.Atom.apply_filter(query, op, key, value)
+  end
   def apply_filter(query, op, key, value, {:type, type}) do
     apply_filter(query, op, key, value, {:type, type, %{}})
   end
