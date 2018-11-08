@@ -21,6 +21,10 @@ defmodule Liquor.Whitelist do
   defp invert_op(:==), do: :!=
   defp invert_op(:!=), do: :==
 
+  defp apply_filter(op, key, value, filter) when is_atom(key) do
+    # somewhat normalize the input
+    apply_filter(op, Atom.to_string(key), value, filter)
+  end
   defp apply_filter(op, "-" <> key, value, filter) do
     apply_filter(invert_op(op), key, value, filter)
   end
