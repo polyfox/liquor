@@ -1,7 +1,7 @@
-defmodule Liquor.Types.Boolean do
-  def cast(nil), do: :error
-  def cast(bool) when is_boolean(bool), do: {:ok, bool}
-  def cast(str) do
+defmodule Liquor.Transformers.Boolean do
+  def transform(nil), do: :error
+  def transform(bool) when is_boolean(bool), do: {:ok, bool}
+  def transform(str) do
     str
     |> String.downcase()
     |> String.trim()

@@ -25,13 +25,25 @@ defmodule Liquor.Transformer do
     f.(op, key, value)
   end
   defp transform_value(value, op, key, :boolean) do
-    case Liquor.Types.Boolean.cast(value) do
+    case Liquor.Transformers.Boolean.transform(value) do
       {:ok, new_value} -> {:ok, {op, key, new_value}}
       :error -> :error
     end
   end
   defp transform_value(value, op, key, {:type, :date}) do
     case Liquor.Transformers.Date.transform(value) do
+      {:ok, new_value} -> {:ok, {op, key, new_value}}
+      :error -> :error
+    end
+  end
+  defp transform_value(value, op, key, {:type, :datetime}) do
+    case Liquor.Transformers.DateTime.transform(value) do
+      {:ok, new_value} -> {:ok, {op, key, new_value}}
+      :error -> :error
+    end
+  end
+  defp transform_value(value, op, key, {:type, :time}) do
+    case Liquor.Transformers.Time.transform(value) do
       {:ok, new_value} -> {:ok, {op, key, new_value}}
       :error -> :error
     end
