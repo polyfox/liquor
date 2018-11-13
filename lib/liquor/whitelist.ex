@@ -30,22 +30,22 @@ defmodule Liquor.Whitelist do
   defp do_apply_filter(op, key, value, filter) when is_function(filter) do
     filter.(op, key, value)
   end
-  defp apply_filter_prefix(op, "==" <> key, value, filter) do
+  defp apply_filter_prefix(_op, "==" <> key, value, filter) do
     apply_filter_prefix(:==, key, value, filter)
   end
-  defp apply_filter_prefix(op, "!=" <> key, value, filter) do
+  defp apply_filter_prefix(_op, "!=" <> key, value, filter) do
     apply_filter_prefix(:!=, key, value, filter)
   end
-  defp apply_filter_prefix(op, ">=" <> key, value, filter) do
+  defp apply_filter_prefix(_op, ">=" <> key, value, filter) do
     apply_filter_prefix(:>=, key, value, filter)
   end
-  defp apply_filter_prefix(op, "<=" <> key, value, filter) do
+  defp apply_filter_prefix(_op, "<=" <> key, value, filter) do
     apply_filter_prefix(:<=, key, value, filter)
   end
-  defp apply_filter_prefix(op, ">" <> key, value, filter) do
+  defp apply_filter_prefix(_op, ">" <> key, value, filter) do
     apply_filter_prefix(:>, key, value, filter)
   end
-  defp apply_filter_prefix(op, "<" <> key, value, filter) do
+  defp apply_filter_prefix(_op, "<" <> key, value, filter) do
     apply_filter_prefix(:<, key, value, filter)
   end
   defp apply_filter_prefix(op, "-" <> key, value, filter) do

@@ -14,16 +14,16 @@ defmodule Liquor.Filter do
   def apply_filter(query, op, key, value, filter) when is_function(filter) do
     filter.(query, op, key, value)
   end
-  def apply_filter(query, :match, key, value, {:type, _, _} = spec) when is_list(value) do
+  def apply_filter(query, :match, key, value, {:type, _, _}) when is_list(value) do
     where(query, [r], field(r, ^key) in ^value)
   end
-  def apply_filter(query, :unmatch, key, value, {:type, _, _} = spec) when is_list(value) do
+  def apply_filter(query, :unmatch, key, value, {:type, _, _}) when is_list(value) do
     where(query, [r], field(r, ^key) not in ^value)
   end
   def apply_filter(query, op, key, value, {:type, _, _} = spec) when is_list(value) do
     Enum.reduce(value, query, fn str, q2 -> apply_filter(q2, op, key, str, spec) end)
   end
-  def apply_filter(query, op, key, nil, {:type, _, %{null: false}}) do
+  def apply_filter(query, _op, _key, nil, {:type, _, %{null: false}}) do
     # the field is not nullable, doesn't matter what the operator is, if it's nil it can't filter
     query
   end
