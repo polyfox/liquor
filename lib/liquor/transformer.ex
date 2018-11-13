@@ -36,8 +36,8 @@ defmodule Liquor.Transformer do
       :error -> :error
     end
   end
-  defp transform_value(value, op, key, {:type, :datetime}) do
-    case Liquor.Transformers.DateTime.transform(value) do
+  defp transform_value(value, op, key, {:type, :naive_datetime}) do
+    case Liquor.Transformers.NaiveDateTime.transform(value) do
       {:ok, new_value} -> {:ok, {op, key, new_value}}
       :error -> :error
     end
