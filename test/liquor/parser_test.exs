@@ -43,6 +43,17 @@ defmodule Liquor.ParserTest do
       assert {:ok, [{"key", nil}, "value"]} == P.parse(~s(key: value))
     end
 
+    test "parses operator prefixes on key" do
+      assert {:ok, [{"==key", "value"}]} == P.parse(~s(==key:value))
+      assert {:ok, [{"!=key", "value"}]} == P.parse(~s(!=key:value))
+      assert {:ok, [{">=key", "value"}]} == P.parse(~s(>=key:value))
+      assert {:ok, [{"<=key", "value"}]} == P.parse(~s(<=key:value))
+      assert {:ok, [{"<key", "value"}]} == P.parse(~s(<key:value))
+      assert {:ok, [{">key", "value"}]} == P.parse(~s(>key:value))
+      assert {:ok, [{"!key", "value"}]} == P.parse(~s(!key:value))
+      assert {:ok, [{"-key", "value"}]} == P.parse(~s(-key:value))
+    end
+
     test "parses multiple items" do
       assert {:ok, [
         {"abc", "def"},

@@ -20,25 +20,49 @@ defmodule Liquor.Whitelist do
   defp invert_op(:==), do: :!=
   defp invert_op(:!=), do: :==
 
-  defp apply_filter(op, key, value, filter) when is_atom(key) do
-    # somewhat normalize the input
-    apply_filter(op, Atom.to_string(key), value, filter)
-  end
-  defp apply_filter(op, "-" <> key, value, filter) do
-    apply_filter(invert_op(op), key, value, filter)
-  end
-  defp apply_filter(op, "!" <> key, value, filter) do
-    apply_filter(invert_op(op), key, value, filter)
-  end
-  defp apply_filter(_op, _key, _value, nil), do: :reject
-  defp apply_filter(_op, _key, _value, false), do: :reject
-  defp apply_filter(op, key, value, true), do: {:ok, {op, String.to_atom(key), value}}
-  defp apply_filter(op, _key, value, atom) when is_atom(atom), do: {:ok, {op, atom, value}}
-  defp apply_filter(op, key, value, {:apply, m, f, a}) when is_atom(m) and is_atom(f) do
+  defp do_apply_filter(_op, _key, _value, nil), do: :reject
+  defp do_apply_filter(_op, _key, _value, false), do: :reject
+  defp do_apply_filter(op, key, value, true), do: {:ok, {op, String.to_atom(key), value}}
+  defp do_apply_filter(op, _key, value, atom) when is_atom(atom), do: {:ok, {op, atom, value}}
+  defp do_apply_filter(op, key, value, {:apply, m, f, a}) when is_atom(m) and is_atom(f) do
     :erlang.apply(m, f, [op, key, value | a])
   end
-  defp apply_filter(op, key, value, filter) when is_function(filter) do
+  defp do_apply_filter(op, key, value, filter) when is_function(filter) do
     filter.(op, key, value)
+  end
+  defp apply_filter_prefix(op, "==" <> key, value, filter) do
+    apply_filter_prefix(:==, key, value, filter)
+  end
+  defp apply_filter_prefix(op, "!=" <> key, value, filter) do
+    apply_filter_prefix(:!=, key, value, filter)
+  end
+  defp apply_filter_prefix(op, ">=" <> key, value, filter) do
+    apply_filter_prefix(:>=, key, value, filter)
+  end
+  defp apply_filter_prefix(op, "<=" <> key, value, filter) do
+    apply_filter_prefix(:<=, key, value, filter)
+  end
+  defp apply_filter_prefix(op, ">" <> key, value, filter) do
+    apply_filter_prefix(:>, key, value, filter)
+  end
+  defp apply_filter_prefix(op, "<" <> key, value, filter) do
+    apply_filter_prefix(:<, key, value, filter)
+  end
+  defp apply_filter_prefix(op, "-" <> key, value, filter) do
+    apply_filter_prefix(invert_op(op), key, value, filter)
+  end
+  defp apply_filter_prefix(op, "!" <> key, value, filter) do
+    apply_filter_prefix(invert_op(op), key, value, filter)
+  end
+  defp apply_filter_prefix(op, key, value, filter) do
+    do_apply_filter(op, key, value, filter)
+  end
+  defp apply_filter(op, key, value, filter) when is_atom(key) do
+    # somewhat normalize the input
+    do_apply_filter(op, Atom.to_string(key), value, filter)
+  end
+  defp apply_filter(op, key, value, filter) when is_binary(key) do
+    apply_filter_prefix(op, key, value, filter)
   end
 
   defp handle_item(:reject, acc), do: acc

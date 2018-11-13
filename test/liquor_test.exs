@@ -30,7 +30,16 @@ defmodule LiquorTest do
       assert [
         {:match, :body, "Hello, World"},
         {:match, :_, "word"},
-      ] = result
+      ] == result
+    end
+
+    test "can whitelist terms with their prefixed operators" do
+      assert {:ok, result} = Liquor.prepare_terms("==body:'Hello, World' >=event_date:2018-11-13 word", @search_spec)
+      assert [
+        {:==, :body, "Hello, World"},
+        {:>=, :event_date, ~D[2018-11-13]},
+        {:match, :_, "word"},
+      ] == result
     end
   end
 
