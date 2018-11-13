@@ -47,6 +47,7 @@ defmodule Liquor do
     |> filter_terms(terms, spec.filter)
   end
 
+  @spec binary_op(atom) :: :match | :unmatch
   def binary_op(:match), do: :match
   def binary_op(:==), do: :match
   def binary_op(:>=), do: :match
