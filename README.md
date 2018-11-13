@@ -12,23 +12,18 @@ First you must define a search spec, luckily it's just a plain old map
 my_search_spec = %{
   # Whitelists can be a map containing the name of each 'allowed' field.
   whitelist: %{
-    items: %{
-      :_ => true, # :_ is a special key for strings with no key
-      "derp" => nil, # this field will be rejected
-      "body" => true, # this field will be allowed,
-      "kind" => :message_kind, # the field will be renamed to `message_kind` and accepted
-      "date" => :date,
-    }
+    "_" => true, # "_" is a special key for strings with no key
+    "derp" => nil, # this field will be rejected
+    "body" => true, # this field will be allowed,
+    "kind" => :message_kind, # the field will be renamed to `message_kind` and accepted
+    "date" => :date,
   },
   # transforms tell liquor how to convert the whitelisted fields
   transform: %{
-    items: %{
-      _: {:type, :string},
-      body: {:type, :string}, # uses Ecto.Type.cast(:string)
-      message_kind: {:mod, MessageKindEnum}, # works with Ecto.Type modules
-      date: {:type, :date}, # dates, datetimes and time have special transforms
-    },
-    keyword: {:type, :string}, # a special handler for keywords, may be dropped in the future, just use :_ instead probably
+    _: {:type, :string}, # a special handler for keywords
+    body: {:type, :string}, # uses Ecto.Type.cast(:string)
+    message_kind: {:mod, MessageKindEnum}, # works with Ecto.Type modules
+    date: {:type, :date}, # dates, datetimes and time have special transforms
   },
   # filter tells liquor how to handle the transformed values when adding it to the query
   filter: %{

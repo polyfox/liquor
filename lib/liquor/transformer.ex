@@ -8,12 +8,7 @@ defmodule Liquor.Transformer do
     atom |
     ((atom, atom, term) -> {:ok, {atom, atom, term}} | :error)
 
-  @type type_spec :: %{
-    items: %{
-      atom => spec_item
-    },
-    keyword: spec_item
-  }
+  @type type_spec :: %{ atom => spec_item }
 
   @spec transform_value(term, atom, atom, spec_item) :: {:ok, {atom, atom, term}} | :error
   defp transform_value(value, op, key, {:mod, module}) do
@@ -57,22 +52,22 @@ defmodule Liquor.Transformer do
   def transform(values, spec) do
     Enum.reduce(values, [], fn
       {op, key, value}, acc ->
-        if Map.has_key?(spec.items, key) do
-          {:ok, new_value} = transform_value(value, op, key, spec.items[key])
+        if Map.has_key?(spec, key) do
+          {:ok, new_value} = transform_value(value, op, key, spec[key])
           [new_value | acc]
         else
           acc
         end
       {key, value}, acc ->
-        if Map.has_key?(spec.items, key) do
-          {:ok, new_value} = transform_value(value, :match, key, spec.items[key])
+        if Map.has_key?(spec, key) do
+          {:ok, new_value} = transform_value(value, :match, key, spec[key])
           [new_value | acc]
         else
           acc
         end
       value, acc ->
         if spec.keyword do
-          {:ok, new_value} = transform_value(value, :match, nil, spec.keyword)
+          {:ok, new_value} = transform_value(value, :match, nil, spec._)
           [new_value | acc]
         else
           acc

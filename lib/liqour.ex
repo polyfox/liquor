@@ -35,13 +35,14 @@ defmodule Liquor do
 
   @spec apply_search(Ecto.Query.t, String.t | list, search_spec) :: Ecto.Query.t
   def apply_search(query, string, spec) when is_binary(string) do
-    {:ok, terms} = prepare_terms(string, spec)
+    {:ok, terms} = parse_string(string)
     apply_search(query, terms, spec)
   end
   def apply_search(query, terms, spec) when is_map(terms) do
     apply_search(query, Map.to_list(terms), spec)
   end
   def apply_search(query, terms, spec) when is_list(terms) do
+    {:ok, terms} = prepare_terms(terms, spec)
     query
     |> filter_terms(terms, spec.filter)
   end

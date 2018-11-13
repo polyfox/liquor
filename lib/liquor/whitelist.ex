@@ -9,8 +9,7 @@ defmodule Liquor.Whitelist do
     atom |
     {:apply, module, atom, list} |
     filter_func
-  @type filter ::
-    %{items: %{String.t => filter_item}} | filter_func
+  @type filter :: %{String.t => filter_item} | filter_func
 
   defp invert_op(:match), do: :unmatch
   defp invert_op(:unmatch), do: :match
@@ -33,7 +32,6 @@ defmodule Liquor.Whitelist do
   end
   defp apply_filter(_op, _key, _value, nil), do: :reject
   defp apply_filter(_op, _key, _value, false), do: :reject
-  defp apply_filter(op, :_, value, true), do: {:ok, {op, :_, value}}
   defp apply_filter(op, key, value, true), do: {:ok, {op, String.to_atom(key), value}}
   defp apply_filter(op, _key, value, atom) when is_atom(atom), do: {:ok, {op, atom, value}}
   defp apply_filter(op, key, value, {:apply, m, f, a}) when is_atom(m) and is_atom(f) do
@@ -61,8 +59,9 @@ defmodule Liquor.Whitelist do
       value, acc ->
         handle_item(apply_filter(:match, :_, value, filter), acc)
     end)
+    |> Enum.reverse()
   end
-  def whitelist(terms, map) when is_map(map) do
-    whitelist(terms, &(apply_filter(&1, &2, &3, map.items[&2])))
+  def whitelist(terms, filter_spec) when is_map(filter_spec) do
+    whitelist(terms, &apply_filter(&1, &2, &3, filter_spec[&2]))
   end
 end
