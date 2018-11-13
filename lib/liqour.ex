@@ -46,4 +46,13 @@ defmodule Liquor do
     query
     |> filter_terms(terms, spec.filter)
   end
+
+  def binary_op(:match), do: :match
+  def binary_op(:==), do: :match
+  def binary_op(:>=), do: :match
+  def binary_op(:<=), do: :match
+  def binary_op(:unmatch), do: :unmatch
+  def binary_op(:!=), do: :unmatch
+  def binary_op(:>), do: :unmatch
+  def binary_op(:<), do: :unmatch
 end
