@@ -10,9 +10,7 @@ defmodule Liquor.Filter do
     {:apply, module, atom, list}
 
   @spec apply_filter(Ecto.Query.t, atom, atom, term, filter) :: Ecto.Query.t
-  def apply_filter(query, _op, _key, _value, nil) do
-    query
-  end
+  def apply_filter(query, _op, _key, _value, nil), do: query
   def apply_filter(query, op, key, value, filter) when is_function(filter) do
     filter.(query, op, key, value)
   end
@@ -49,8 +47,8 @@ defmodule Liquor.Filter do
   def apply_filter(query, op, key, value, {:type, :time, _}) do
     Liquor.Filters.Time.apply_filter(query, op, key, value)
   end
-  def apply_filter(query, op, key, value, {:type, :datetime, _}) do
-    Liquor.Filters.DateTime.apply_filter(query, op, key, value)
+  def apply_filter(query, op, key, value, {:type, :naive_datetime, _}) do
+    Liquor.Filters.NaiveDateTime.apply_filter(query, op, key, value)
   end
   def apply_filter(query, op, key, value, {:type, type, _}) when type in [:integer, :float, :decimal] do
     Liquor.Filters.Numeric.apply_filter(query, op, key, value)

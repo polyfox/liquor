@@ -1,7 +1,7 @@
-defmodule Liquor.Filters.DateTimeTest do
+defmodule Liquor.Filters.NaiveDateTimeTest do
   use Liquor.Support.DataCase
   alias Liquor.Support.Models.Message
-  alias Liquor.Filters.DateTime, as: DTF
+  alias Liquor.Filters.NaiveDateTime, as: DTF
 
   describe "apply_filter(&1, :match, &2, %Date{})" do
     test "can filter by date" do

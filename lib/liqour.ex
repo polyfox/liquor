@@ -8,14 +8,14 @@ defmodule Liquor do
   @spec parse_string(String.t) :: {:ok, list} | {:error, term}
   def parse_string(string), do: Liquor.Parser.parse(string, parse_operators: true)
 
-  @spec whitelist_terms(list, Liquor.Whitelist.filter()) :: list
-  def whitelist_terms(terms, filter), do: Liquor.Whitelist.whitelist(terms, filter)
+  @spec whitelist_terms(list, search_spec) :: list
+  def whitelist_terms(terms, search_spec), do: Liquor.Whitelist.whitelist(terms, search_spec.whitelist)
 
-  @spec transform_terms(list, Liquor.Transformer.type_spec()) :: list
-  def transform_terms(terms, type_spec), do: Liquor.Transformer.transform(terms, type_spec)
+  @spec transform_terms(list, search_spec) :: list
+  def transform_terms(terms, search_spec), do: Liquor.Transformer.transform(terms, search_spec.transform)
 
-  @spec filter_terms(Ecto.Query.t, list, Liquor.Filter.filter()) :: Ecto.Query.t
-  def filter_terms(query, terms, filter), do: Liquor.Filter.filter(query, terms, filter)
+  @spec filter_terms(Ecto.Query.t, list, search_spec) :: Ecto.Query.t
+  def filter_terms(query, terms, search_spec), do: Liquor.Filter.filter(query, terms, search_spec.filter)
 
   @spec prepare_terms(String.t, search_spec) :: {:ok, list} | {:error, term}
   def prepare_terms(string, spec) when is_binary(string) do
@@ -28,8 +28,8 @@ defmodule Liquor do
     prepare_terms(Map.to_list(terms), spec)
   end
   def prepare_terms(terms, spec) when is_list(terms) do
-    terms = whitelist_terms(terms, spec.whitelist)
-    terms = transform_terms(terms, spec.transform)
+    terms = whitelist_terms(terms, spec)
+    terms = transform_terms(terms, spec)
     {:ok, terms}
   end
 
@@ -44,7 +44,7 @@ defmodule Liquor do
   def apply_search(query, terms, spec) when is_list(terms) do
     {:ok, terms} = prepare_terms(terms, spec)
     query
-    |> filter_terms(terms, spec.filter)
+    |> filter_terms(terms, spec)
   end
 
   @spec binary_op(atom) :: :match | :unmatch

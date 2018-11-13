@@ -1,4 +1,4 @@
-defmodule Liquor.Filters.DateTime do
+defmodule Liquor.Filters.NaiveDateTime do
   @moduledoc """
   Specialized module for filtering timestamp fields
   """

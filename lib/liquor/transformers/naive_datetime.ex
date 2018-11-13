@@ -1,4 +1,4 @@
-defmodule Liquor.Transformers.DateTime do
+defmodule Liquor.Transformers.NaiveDateTime do
   for s <- [:year, :month, :day, :hour, :minute, :second, :millisecond] do
     prefix = "#{s}:"
     def transform(unquote(prefix) <> value) do
@@ -7,6 +7,6 @@ defmodule Liquor.Transformers.DateTime do
   end
 
   def transform(string) do
-    Ecto.Type.cast(:datetime, string)
+    Ecto.Type.cast(:naive_datetime_usec, string)
   end
 end

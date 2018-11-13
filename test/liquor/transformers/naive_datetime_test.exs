@@ -1,6 +1,6 @@
-defmodule Liquor.Transformers.DateTimeTest do
+defmodule Liquor.Transformers.NaiveDateTimeTest do
   use ExUnit.Case
-  alias Liquor.Transformers.DateTime, as: T
+  alias Liquor.Transformers.NaiveDateTime, as: T
 
   describe "transform/1" do
     test "can transform a year: prefix" do
