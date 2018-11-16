@@ -11,6 +11,7 @@ defmodule Liquor.Whitelist do
     filter_func
   @type filter :: %{String.t => filter_item} | filter_func
 
+  @spec invert_op(Liquor.op) :: Liquor.op
   defp invert_op(:match), do: :unmatch
   defp invert_op(:unmatch), do: :match
   defp invert_op(:>=), do: :<

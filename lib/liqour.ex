@@ -1,4 +1,20 @@
 defmodule Liquor do
+  @moduledoc """
+  Liquor is a search filter helper, it provides:
+    * whitelisting
+    * transformation
+    * filtering
+  """
+  @type op ::
+    :match |
+    :unmatch |
+    :== |
+    :!= |
+    :>= |
+    :<= |
+    :> |
+    :<
+
   @type search_spec :: %{
     whitelist: Liquor.Whitelist.filter(),
     transform: Liquor.Transformer.type_spec(),
@@ -47,7 +63,7 @@ defmodule Liquor do
     |> filter_terms(terms, spec)
   end
 
-  @spec binary_op(atom) :: :match | :unmatch
+  @spec binary_op(op) :: :match | :unmatch
   def binary_op(:match), do: :match
   def binary_op(:==), do: :match
   def binary_op(:>=), do: :match

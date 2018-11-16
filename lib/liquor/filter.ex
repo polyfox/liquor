@@ -5,11 +5,11 @@ defmodule Liquor.Filter do
   import Ecto.Query
 
   @type filter ::
-    ((Ecto.Query.t, atom, atom, term) -> Ecto.Query.t) |
+    ((Ecto.Query.t, Liquor.op, atom, term) -> Ecto.Query.t) |
     map |
     {:apply, module, atom, list}
 
-  @spec apply_filter(Ecto.Query.t, atom, atom, term, filter) :: Ecto.Query.t
+  @spec apply_filter(Ecto.Query.t, Liquor.op, atom, term, filter) :: Ecto.Query.t
   def apply_filter(query, _op, _key, _value, nil), do: query
   def apply_filter(query, op, key, value, filter) when is_function(filter) do
     filter.(query, op, key, value)
@@ -28,18 +28,7 @@ defmodule Liquor.Filter do
     query
   end
   def apply_filter(query, op, key, nil, {:type, _, _}) do
-    # the field allows nils, and the field is currently nil
-    case op do
-      :match -> where(query, [r], is_nil(field(r, ^key)))
-      :unmatch -> where(query, [r], not is_nil(field(r, ^key)))
-      :== -> where(query, [r], is_nil(field(r, ^key)))
-      :!= -> where(query, [r], not is_nil(field(r, ^key)))
-      # these shouldn't even work
-      :<= -> where(query, [r], is_nil(field(r, ^key)))
-      :>= -> where(query, [r], is_nil(field(r, ^key)))
-      :> -> where(query, [r], not is_nil(field(r, ^key)))
-      :< -> where(query, [r], not is_nil(field(r, ^key)))
-    end
+    Liquor.Filters.Null.apply_filter(query, op, key, nil)
   end
   def apply_filter(query, op, key, value, {:type, :date, _}) do
     Liquor.Filters.Date.apply_filter(query, op, key, value)
@@ -52,6 +41,10 @@ defmodule Liquor.Filter do
   end
   def apply_filter(query, op, key, value, {:type, type, _}) when type in [:integer, :float, :decimal] do
     Liquor.Filters.Numeric.apply_filter(query, op, key, value)
+  end
+  # static strings are like Atoms, they cannot be partially matched
+  def apply_filter(query, op, key, value, {:type, :string, %{static: true}}) when is_binary(value) do
+    Liquor.Filters.Atom.apply_filter(query, op, key, value)
   end
   def apply_filter(query, op, key, value, {:type, :string, _}) when is_binary(value) do
     Liquor.Filters.String.apply_filter(query, op, key, value)

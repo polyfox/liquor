@@ -10,7 +10,7 @@ defmodule Liquor.Transformer do
 
   @type type_spec :: %{ atom => spec_item }
 
-  @spec transform_value(term, atom, atom, spec_item) :: {:ok, {atom, atom, term}} | :error
+  @spec transform_value(term, Liquor.op, atom, spec_item) :: {:ok, {atom, atom, term}} | :error
   defp transform_value(value, op, key, {:mod, module}) do
     case module.cast(value) do
       {:ok, new_value} -> {:ok, {op, key, new_value}}

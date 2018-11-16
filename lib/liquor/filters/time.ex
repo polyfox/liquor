@@ -6,7 +6,6 @@ defmodule Liquor.Filters.Time do
 
   @allowed_fields [:hour, :minute, :second]
 
-
   def apply_filter(query, :match, key, %Time{} = time), do: apply_filter(query, :==, key, time)
   def apply_filter(query, :match, key, {atom, _year} = value) when atom in @allowed_fields, do: apply_filter(query, :==, key, value)
 
