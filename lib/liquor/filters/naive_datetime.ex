@@ -4,7 +4,7 @@ defmodule Liquor.Filters.NaiveDateTime do
   """
   import Ecto.Query
 
-  @allowed_fields [:year, :month, :day, :hour, :minute, :second]
+  @allowed_fields [:year, :month, :day, :hour, :minute, :second, :microsecond]
 
   def apply_filter(query, :match, key, %Date{} = date), do: apply_filter(query, :==, key, date)
   #def apply_filter(query, :match, key, %DateTime{} = datetime), do: apply_filter(query, :==, key, datetime)

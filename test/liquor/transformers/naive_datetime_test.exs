@@ -3,6 +3,14 @@ defmodule Liquor.Transformers.NaiveDateTimeTest do
   alias Liquor.Transformers.NaiveDateTime, as: T
 
   describe "transform/1" do
+    test "can transform a nil" do
+      assert {:ok, nil} == T.transform(nil)
+    end
+
+    test "can transform a blank string" do
+      assert {:ok, nil} == T.transform("")
+    end
+
     test "can transform a year: prefix" do
       assert {:ok, {:year, 1999}} == T.transform("year:1999")
     end
@@ -27,8 +35,21 @@ defmodule Liquor.Transformers.NaiveDateTimeTest do
       assert {:ok, {:second, 12}} == T.transform("second:12")
     end
 
-    test "can transform a millisecond: prefix" do
-      assert {:ok, {:millisecond, 12}} == T.transform("millisecond:12")
+    test "can transform a microsecond: prefix" do
+      assert {:ok, {:microsecond, 12}} == T.transform("microsecond:12")
+    end
+
+    test "can transform a NaiveDateTime struct" do
+      assert {:ok,
+        %NaiveDateTime{year: 2018, month: 11, day: 26, hour: 15, minute: 23, second: 5, microsecond: {0, 6}}
+      } == T.transform(%NaiveDateTime{year: 2018, month: 11, day: 26, hour: 15, minute: 23, second: 5})
+    end
+
+    test "can transform a DateTime struct" do
+      {:ok, dt, _} = DateTime.from_iso8601("2018-11-26T15:23:05Z")
+      assert {:ok,
+        %NaiveDateTime{year: 2018, month: 11, day: 26, hour: 15, minute: 23, second: 5, microsecond: {0, 6}}
+      } == T.transform(dt)
     end
   end
 end

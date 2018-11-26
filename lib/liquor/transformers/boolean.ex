@@ -1,5 +1,6 @@
 defmodule Liquor.Transformers.Boolean do
-  def transform(nil), do: :error
+  def transform(nil), do: {:ok, nil}
+  def transform(""), do: {:ok, nil}
   def transform(bool) when is_boolean(bool), do: {:ok, bool}
   def transform(str) do
     str
