@@ -4,7 +4,8 @@ defmodule Liquor.Transformer do
   """
   @type spec_item ::
     {:apply, module, atom, list} |
-    {:type, module} |
+    {:mod, module} |
+    {:type, atom} |
     atom |
     ((atom, atom, term) -> {:ok, {atom, atom, term}} | :error)
 
